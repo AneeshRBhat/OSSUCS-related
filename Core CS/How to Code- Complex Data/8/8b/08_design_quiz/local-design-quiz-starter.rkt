@@ -45,7 +45,40 @@
          (... (fn-for-player (first r))
               (fn-for-roster (rest r)))]))
 
+;; Roster Roster -> Boolean
+;; Produce true if all players in both rosters play
 
+;                                     Ros1
+;      ┌─────────────┬─────────────────────┬──────────────────────┐
+;      │             │                     │                      │
+;      │             │        empty        │ (cons Player Roster) │
+;      ├─────────────┼─────────────────────┼──────────────────────┤
+;      │             │                     │                      │
+;      │    empty    │        true         │         false        │
+; Ros2 │             │                     │                      │
+;      ├─────────────┼─────────────────────┼──────────────────────┤
+;      │             │                     │                      │
+;      │(cons Player │        false        │          true        │
+;      │      Roster)│                     │                      │
+;      └─────────────┴─────────────────────┴──────────────────────┘
+
+(check-expect (all-play? empty empty) true)
+(check-expect (all-play? empty R1) false)
+(check-expect (all-play? R2 empty) false)
+(check-expect (all-play? R1
+                        (list "Maria" "Nadia" "Elena" "Anastasia"))
+              true)
+(check-expect (all-play? R1 R2) false)
+                        
+
+;; (define (all-play? rst1 rst2) false) ;Stub
+
+(define (all-play? rst1 rst2)
+  (local [(define s-rst1 (empty? rst1))
+          (define s-rst2 (empty? rst2))]
+    (cond [(and s-rst1 s-rst2) true]
+        [(or s-rst1 s-rst2) false]
+        [else (all-play? (rest rst1) (rest rst2))])))
 
 (define-struct match (p1 p2))
 ;; Match is (make-match Player Player)
@@ -86,3 +119,36 @@
 ; produces true. In other words, you can assume the two teams have the same number
 ; of players.
 ;
+
+;; Roster Roster -> ListOfMatch
+;; Produce a list of match pairings
+
+;                                     Ros1
+;      ┌─────────────┬─────────────────────┬─────────────────────────────────────────┐
+;      │             │                     │                                         │
+;      │             │        empty        │ (cons Player Roster)                    │
+;      ├─────────────┼─────────────────────┼─────────────────────────────────────────┤
+;      │             │                     │                                         │
+;      │    empty    │     empty           │    IMPOSSIBLE                           │
+; Ros2 │             │                     │                                         │
+;      ├─────────────┼─────────────────────┼─────────────────────────────────────────┤
+;      │             │                     │                                         │
+;      │(cons Player │     IMPOSSIBLE      │ (cons (list (first rst1) (first rst2))  │
+;      │      Roster)│                     │       recurse on the rest of both lists │
+;      │             │                     │                                         │
+;      └─────────────┴─────────────────────┴─────────────────────────────────────────┘
+
+(check-expect (make-pairings empty empty) empty)
+(check-expect (make-pairings (list "Andrea" "Maria")
+                             (list "Roger" "Novak"))
+              (list (make-match "Andrea" "Roger")
+                    (make-match "Maria" "Novak")))
+
+;; (define (make-pairings rst1 rst2) empty) ;Stub
+
+(define (make-pairings rst1 rst2)
+  (cond [(empty? rst1) empty]
+        [else (cons (make-match (first rst1)
+                                (first rst2))
+                    (make-pairings (rest rst1)
+                                   (rest rst2)))]))
