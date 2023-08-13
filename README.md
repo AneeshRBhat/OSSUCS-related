@@ -3,7 +3,7 @@ Assignment solutions and other course materials related to the OSSU CS curriculu
 
 Progress on the OSSU CS course
 # Intro CS
-**Python for Everybody** - 22/05/23 - 07/06/23
+**Python for Everybody** - 22/05/23 - 07/06/23 </br>
 **Introduction to Computer Science and Programming using Python** - 23/05/23 - 13/06/23
 
 # Core CS
