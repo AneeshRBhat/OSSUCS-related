@@ -1,9 +1,0 @@
-(* This is a comment. This is my first program *)
-(* Comments are round parantheses and star*)
-
-val x = 34; (* int *)
-
-(* val keyword for variable *)
-
-val y = 17;
-
