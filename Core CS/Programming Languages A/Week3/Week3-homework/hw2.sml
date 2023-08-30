@@ -8,19 +8,6 @@ fun same_string(s1 : string, s2 : string) =
 
 (* put your solutions for problem 1 here *)
 
-(* you may assume that Num is always used with values 2, 3, ..., 10
-   though it will not really come up *)
-datatype suit = Clubs | Diamonds | Hearts | Spades
-datatype rank = Jack | Queen | King | Ace | Num of int 
-type card = suit * rank
-
-datatype color = Red | Black
-datatype move = Discard of card | Draw 
-
-exception IllegalMove;
-
-(* put your solutions for problem 2 here *)
- 
 (* Problem 1 *)
 
 (* Subquestion (a) *)
@@ -80,8 +67,22 @@ fun similar_names (lolos, {first=x, last=y, middle=z}) =
     in
 	create_possible_names (possible_subs)
     end;
-							   
-					  
+
+
+	     
+(* you may assume that Num is always used with values 2, 3, ..., 10
+   though it will not really come up *)
+datatype suit = Clubs | Diamonds | Hearts | Spades
+datatype rank = Jack | Queen | King | Ace | Num of int 
+type card = suit * rank
+
+datatype color = Red | Black
+datatype move = Discard of card | Draw 
+
+exception IllegalMove;
+
+(* put your solutions for problem 2 here *)
+					   					  
 (* Problem 2 *)
 
 (* Subquestion (a) *)
@@ -198,12 +199,107 @@ fun officiate (cs, ms, goal) =
 (* card list * int -> int *)
 (* Challenge version of score, Aces can have value of 1 or 11: Whichever leads to the best score *)
 
-fun score_challenge (cs, goal) = 
+fun sum_cards_challenge cs0 =
+    (* rsf is int; Context preserving accumulator, sum of values of cards visited so far *)
+    (* acc is int; Context preserving accumulator, no. of Aces seen so far in the list *)
     let
-	
+	fun sum_cards (cs, rsf) =
+	    case cs of
+		[] => rsf
+	      | (_, Ace)::cs' => sum_cards (cs', rsf)
+	      | (s, r)::cs' => sum_cards (cs', rsf + card_value((s,r)))
     in
-	
+	sum_cards(cs0, 0)
     end;
+
+fun score_challenge (hcs, goal) = 
+    let						
+	fun assign_ace_values (cs, sum) =
+	    case (cs, sum) of
+		([], sum) => sum
+	      | ((_, Ace)::cs', sum) => if sum+11 > goal
+					then assign_ace_values (cs', sum + 11)
+					else assign_ace_values (cs', sum + 1)
+	      | (_::cs', sum) => assign_ace_values(cs', sum)
+							
+	val sum = assign_ace_values (hcs, (sum_cards_challenge hcs))
+	val preliminary_score = if sum > goal
+				then 3*(sum-goal)
+				else (goal-sum)
+	val final_score = if all_same_color hcs
+			  then preliminary_score div 2
+		  	  else preliminary_score
+    in
+	final_score
+    end;
+
+fun officiate_challenge (cs, ms, goal) =
+    let
+	fun perform_moves (ms, cs, hcs) =
+	    case ms of
+		[] => score_challenge (hcs, goal)
+	      | Discard c::ms' => perform_moves(ms', cs, remove_card(hcs, c, IllegalMove))
+	      | Draw::ms' => case cs of
+				 [] => score_challenge (hcs, goal)
+			       | c::cs' =>
+				 let
+				     val new_hand = c::hcs
+				     val sum = sum_cards_challenge (new_hand)
+				 in
+				     if sum > goal
+				     then score_challenge (new_hand, goal)
+				     else perform_moves (ms', cs', new_hand)
+				 end;
+    in
+	perform_moves(ms, cs, [])
+    end;
+
+(* Problem 2: Challenge Problems *)
+
+(* card list * int -> move list *)
+(* Produce a list of moves that get the value of held cards (initially empty) to the goal, i.e., score 0 *)
+
+fun careful_player (cs0, goal) =
+    let
+	fun make_move_list (cs, ms, hcs) = 
+	    case (cs, ms,  hcs) of
+		([], ms, hcs) => if score (hcs, goal) = 0
+				 then ms
+				 else ms @ [Draw]
+	      | (c::cs', ms, hcs) => if score (hcs, goal) = 0
+				     then ms
+				     else
+					 let val card_total = sum_cards hcs
+					     val new_total = (card_value c) + card_total
+					 in
+					     if (card_total + 10) < goal
+					     then make_move_list (cs', ms @ [Draw], c::hcs)
+					     else
+						 if new_total <= goal
+						 then make_move_list(cs', ms @ [Draw], c::hcs)
+						 else
+						     let
+							 exception ThisWillNeverHappen
+							 val value_over_goal = new_total - goal
+							 fun waste_card (hcs, v) =
+							     case hcs of
+								 [] => raise ThisWillNeverHappen
+							       | hc::hcs' => if (card_value hc) >= v
+									     then hc
+									     else waste_card (hcs', v)
+
+							 val to_remove = waste_card (hcs, value_over_goal)
+							 val new_hand = remove_card(hcs, to_remove, IllegalMove)
+						     in
+							 make_move_list(cs', ms@[Draw, Discard to_remove], c::new_hand)
+						     end
+					 end
+    in
+	make_move_list (cs0, [], [])
+    end
+	
+
+
 
 
 

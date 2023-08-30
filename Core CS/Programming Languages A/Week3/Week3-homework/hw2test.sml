@@ -5,6 +5,13 @@ use "hw2.sml";
 (* To run the test, add a new line to the top of this file: use "homeworkname.sml"; *)
 (* All the tests should evaluate to true. For example, the REPL should say: val test1 = true : bool *)
 
+val card_list0 = [(Hearts, Ace)]
+val card_list1 = [(Clubs, Num 9), (Spades, Num 6), (Clubs, Num 7), (Hearts, Num 8)]
+val card_list2 = [(Clubs, Num 9), (Spades, Num 6), (Clubs, Num 7), (Diamonds, Num 2), (Hearts, Num 8)]
+val card_list3 = [(Spades, King), (Hearts, Num 10), (Hearts, Num 3), (Spades, Num 2), (Spades, Num 8)]
+val card_list4 = [(Spades, Num 3), (Diamonds, Num 9), (Clubs, Num 4), (Clubs, Num 6), (Diamonds, Num 6)]
+		     
+
 val test1 = all_except_option ("string", ["string"]) = SOME []
 
 val test2 = get_substitutions1 ([["foo"],["there"]], "foo") = []
@@ -80,7 +87,7 @@ val test13 = ((officiate([(Clubs,Jack),(Spades,Num(8))],
                          42); false)
 	      handle IllegalMove => true)
 
-(*
+
 val test14a = score_challenge ([(Hearts, Num 2),(Clubs, Num 4)],10) = 4
 									  
 val test14b = score_challenge ([(Hearts, Num 2),(Diamonds, Num 4)],10)
@@ -92,5 +99,13 @@ val test14d = score_challenge ([(Hearts, Ace),(Spades, King)],20)
 	      = 3*((10+11)-20)
 
 val test14e = score_challenge ([(Hearts, Ace),(Spades, King)], 15)
-	       = (15 - (10 + 1))
-*)
+	      = 3*(21-15)
+
+
+
+		     
+val test15a = careful_player (card_list0, 11) = [Draw]
+val test15b = careful_player (card_list1, 30) = [Draw, Draw, Draw, Draw]
+val test15c = careful_player (card_list2, 30) = [Draw, Draw, Draw, Draw, Draw, Discard (Diamonds, Num 2)]
+val test15d = careful_player (card_list3, 30) = [Draw, Draw, Draw, Draw, Draw, Discard (Hearts, Num 3)]
+val test15e = careful_player (card_list4, 30) = [Draw, Draw, Draw, Draw, Draw, Draw]
