@@ -178,9 +178,89 @@ fun first_match v lst =
     handle NoAnswer => NONE;
     
 
-(* ('a -> 'b option) -> 'a list -> 'b *)
-(* Apply f to all elements of lst in order, return v at the first   instance of SOME v, raise NoAnswer if all elements return NONE*)
+(* Problem 13 *)
+(* (string * string * valu) * pattern list -> typ option *)
+(* Produce SOME t that is applicable to all patterns in the list *)
+(* Wildcard -> Anything / The previous accumulated type
+   Variable s -> Anything / The previous accumulated type
+   UnitP ->  UnitT
+   ConstP i -> intT
+   TupleP ps -> TupleT ts
+   ConstructorP (s, p) -> Look for the common type from the datatypes list *)
 
-(* Problem 13 - Challenge Problem *)
-			   
-(* ((string * string * typ) list) * (pattern list) -> typ option *)
+fun typecheck_patterns (defs, ps0) =
+    let
+	exception NoSuchConstructor
+		      
+	fun cons_helper (s, tdefs) =
+	    case tdefs of
+		[] => ""
+	      | (con,dat,typ)::tdefs' => if con = s
+					 then dat
+					 else cons_helper (s,tdefs')
+
+	fun tuple_helper ps =
+	    case ps of
+		[] => []
+	      | (Wildcard | Variable _)::ps' => Anything::tuple_helper(ps')
+	      | UnitP::ps' => UnitT::tuple_helper(ps')
+	      | ConstP _::ps' => IntT::tuple_helper ps'
+	      | TupleP plst::ps' => (TupleT (tuple_helper plst))::tuple_helper ps'
+	      | ConstructorP (s,p)::ps' => Datatype (cons_helper (s, defs))::tuple_helper ps'
+
+	fun check_typ_list (ts, accts) =
+	    case (ts, accts) of
+		([],[]) => true
+	      | (ts, []) => false
+	      | ([], ts) => false
+	      | (t::ts', acct::accts') => ((t = Anything) orelse (acct = Anything)
+					   orelse (t = acct))
+					   andalso
+					   (check_typ_list (ts', accts'))
+			  
+	fun check_tup_types (ts, acc) =
+	    case (ts, acc) of
+		(ts1, TupleT accts) => check_typ_list(ts1, accts)
+	      | (ts1, _) => false
+
+	fun resolve_tups (nl, TupleT ol, acc) =
+	    case (nl, ol, acc) of
+		([],[],acc) => rev acc
+	      | (t1::nl',t2::ol',acc) => if t1 = Anything
+					 then (resolve_tups (nl', TupleT ol', t2::acc))
+					 else (resolve_tups (nl', TupleT ol', t1::acc))
+
+				  
+	fun typecheck_helper(ps, acc) =
+	    case ps of
+		[] => SOME acc
+	      | Wildcard::ps' => (typecheck_helper(ps', acc))
+	      | Variable(x)::ps' => (typecheck_helper(ps', acc))
+	      | UnitP::ps' => if acc = Anything orelse acc = UnitT
+			      then (typecheck_helper(ps', UnitT))
+			      else NONE
+	      | ConstP(i)::ps' => if acc = Anything orelse acc = IntT
+				  then (typecheck_helper(ps', IntT))
+				  else NONE
+	      | TupleP plst::ps' => let val tuple_types = tuple_helper plst
+					val same_tup = check_tup_types (tuple_types, acc)
+				    in
+					if acc = Anything 
+					then (typecheck_helper(ps', TupleT tuple_types))
+					else
+					    if same_tup
+					    then typecheck_helper(ps', TupleT (resolve_tups (tuple_types,acc,[])))
+					    else NONE
+				    end
+	      | ConstructorP (s,p)::ps' => let val cons_type = cons_helper (s,defs)
+					   in
+					       if acc = Anything orelse acc = Datatype cons_type
+					       then (typecheck_helper(ps', Datatype cons_type))
+					       else NONE
+					   end
+    in
+	typecheck_helper(ps0, Anything)
+    end
+	
+   
+   
