@@ -12,7 +12,7 @@ Progress on the OSSU CS course
 
 **How to Code - Complex Data** - 17/07/23 - 12/08/23
 
-**Programming Languages, Part A** - *Currently Underway*
+**Programming Languages, Part A** - 13/08/23 - 11/09/23
 
 
 
