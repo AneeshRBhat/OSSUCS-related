@@ -14,5 +14,7 @@ Progress on the OSSU CS course
 
 **Programming Languages, Part A** - 13/08/23 - 11/09/23
 
+**Programming Languages, Part B** - 12/09/23 - 02/10/23
+
 
 
