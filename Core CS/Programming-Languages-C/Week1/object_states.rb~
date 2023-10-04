@@ -1,0 +1,13 @@
+class A
+  def m1
+    @foo = 0
+  end
+
+  def m2
+    @foo = @foo + 1
+  end
+
+  def foo
+    @foo
+  end
+end
