@@ -1,12 +1,11 @@
 # University of Washington, Programming Languages, Homework 6, hw6runner.rb
-require_relative './hw6provided'
-require_relative './hw6graphics'
+
 # This is the only file you turn in, so do not modify the other files as
 # part of your solution.
 
 class MyPiece < Piece
   # The constant All_My_Pieces should be declared here
-  All_My_Pieces = All_Pieces + [rotations([[0,0],[-1,0],[1,0],[-1,1],[0,1]]), #5 block, b like shape
+  All_My_Pieces = All_Pieces + [rotations([[0,0],[-1,0],[1,0],[1,1],[0,1]]), #5 block, b like shape
                                 [[[0,0],[-1,0],[1,0],[-2,0],[2,0]], # 5 block long
                                  [[0,0],[0,-1],[0,1],[0,-2],[0,2]]],
                                 rotations([[0,0],[1,0],[0,1]])]
